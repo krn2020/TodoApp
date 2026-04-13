@@ -41,7 +41,6 @@ public class TodoService : ITodoService
         var todo = await _todoRepository.GetByIdAsync(todoId);
         if (todo == null || todo.UserId != userId) return null;
 
-        // Загружаем подзадачи вручную (можно сделать Include в репозитории)
         var subTasks = await _subTaskRepository.FindAsync(s => s.TodoItemId == todoId);
         todo.SubTasks = subTasks.ToList();
 
@@ -60,7 +59,6 @@ public class TodoService : ITodoService
             orderBy: q => q.OrderByDescending(t => t.CreatedAt)
         );
 
-        // Для каждого элемента загружаем подзадачи (можно оптимизировать)
         foreach (var item in items)
         {
             var subTasks = await _subTaskRepository.FindAsync(s => s.TodoItemId == item.Id);
@@ -110,7 +108,6 @@ public class TodoService : ITodoService
         return true;
     }
 
-    // Подзадачи
     public async Task<SubTaskResponseDto> AddSubTaskAsync(Guid userId, Guid todoId, CreateSubTaskDto dto)
     {
         var todo = await _todoRepository.GetByIdAsync(todoId);
@@ -138,7 +135,6 @@ public class TodoService : ITodoService
         var subTask = await _subTaskRepository.GetByIdAsync(subTaskId);
         if (subTask == null) throw new InvalidOperationException("SubTask not found.");
 
-        // Проверяем, что задача принадлежит пользователю
         var todo = await _todoRepository.GetByIdAsync(subTask.TodoItemId);
         if (todo == null || todo.UserId != userId)
             throw new InvalidOperationException("Access denied.");

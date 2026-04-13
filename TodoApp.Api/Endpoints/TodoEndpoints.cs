@@ -18,7 +18,6 @@ public static class TodoEndpoints
                            .WithTags("Todos")
                            .RequireAuthorization();
 
-        // Создать заметку
         group.MapPost("/", async ([FromBody] CreateTodoDto dto, ITodoService todoService, ClaimsPrincipal user) =>
         {
             var userId = GetUserId(user);
@@ -29,7 +28,6 @@ public static class TodoEndpoints
         .Produces<TodoResponseDto>(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status400BadRequest);
 
-        // Получить все заметки с пагинацией
         group.MapGet("/", async (
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
@@ -46,7 +44,6 @@ public static class TodoEndpoints
         .WithName("GetAllTodos")
         .Produces<PagedResult<TodoResponseDto>>(StatusCodes.Status200OK);
 
-        // Получить заметку по ID
         group.MapGet("/{id:guid}", async (Guid id, ITodoService todoService, ClaimsPrincipal user) =>
         {
             var userId = GetUserId(user);
@@ -57,7 +54,6 @@ public static class TodoEndpoints
         .Produces<TodoResponseDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        // Обновить заметку
         group.MapPut("/{id:guid}", async (Guid id, [FromBody] UpdateTodoDto dto, ITodoService todoService, ClaimsPrincipal user) =>
         {
             var userId = GetUserId(user);
@@ -75,7 +71,6 @@ public static class TodoEndpoints
         .Produces<TodoResponseDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        // Удалить заметку
         group.MapDelete("/{id:guid}", async (Guid id, ITodoService todoService, ClaimsPrincipal user) =>
         {
             var userId = GetUserId(user);
@@ -86,7 +81,6 @@ public static class TodoEndpoints
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status404NotFound);
 
-        // Новые эндпоинты для подзадач
         todosGroup.MapPost("/{todoId:guid}/subtasks", async (Guid todoId, [FromBody] CreateSubTaskDto dto, ITodoService todoService, ClaimsPrincipal user) =>
         {
             var userId = GetUserId(user);
@@ -122,7 +116,6 @@ public static class TodoEndpoints
             return deleted ? Results.NoContent() : Results.NotFound();
         }).WithName("DeleteSubTask").Produces(204).Produces(404);
 
-        // Новые эндпоинты для списков задач
         var listsGroup = app.MapGroup("/api/lists")
                            .WithTags("TodoLists")
                            .RequireAuthorization();
@@ -169,8 +162,6 @@ public static class TodoEndpoints
             return deleted ? Results.NoContent() : Results.NotFound();
         }).WithName("DeleteList").Produces(204).Produces(404);
 
-        // Получение задач конкретного списка (уже есть через параметр listId в GetAllPaginatedAsync)
-        // Для удобства добавим отдельный эндпоинт
         listsGroup.MapGet("/{listId:guid}/todos", async (Guid listId, [FromQuery] int page, [FromQuery] int pageSize, ITodoService todoService, ClaimsPrincipal user) =>
         {
             var userId = GetUserId(user);
